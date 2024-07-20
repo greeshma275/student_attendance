@@ -1,5 +1,6 @@
 import mysql.connector
 import streamlit as st
+import pandas as pd
 
 # Database connection configuration
 db_config = {
@@ -48,20 +49,20 @@ def fetch_query(query, args=None):
             else:
                 cursor.execute(query)
             result = cursor.fetchall()
-            return result
+            columns = [desc[0] for desc in cursor.description]  # Fetch column names
+            return columns, result
         except mysql.connector.Error as err:
             st.error(f"Error: {err}")
         finally:
             cursor.close()
             connection.close()
-    return []
+    return [], []
 
 # Function to check login credentials
 def authenticate(username, password):
     query = "SELECT * FROM ADMIN WHERE Username = %s AND Password = %s"
     result = fetch_query(query, (username, password))
-    st.write(f"Debug: authenticate result: {result}")  # Debug print
-    return len(result) > 0
+    return len(result[1]) > 0
 
 # Function for login page
 def login_page():
@@ -72,22 +73,19 @@ def login_page():
         if authenticate(username, password):
             st.session_state.logged_in = True
             st.success("Logged in successfully.")
-            #st.write(f"Debug: session state: {st.session_state.logged_in}")  # Debug print
         else:
             st.error("Invalid username or password.")
 
 # Main Streamlit app
 def main():
-    if "logged_in" in st.session_state:
-        st.session_state.logged_in =False
-
-    #st.write(f"Debug: before login_page session state: {st.session_state.logged_in}")  # Debug print
+    if "logged_in" not in st.session_state:
+        st.session_state.logged_in = False
 
     if not st.session_state.logged_in:
         login_page()
     else:
         st.title("CRUD Operations with MySQL and Streamlit")
-        
+
         menu = ["Insert", "Read", "Update", "Delete"]
         choice = st.sidebar.selectbox("Menu", menu)
 
@@ -147,13 +145,16 @@ def main():
             table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "ABSENT"])
             if st.button("Fetch Data"):
                 query = f"SELECT * FROM {table}"
-                results = fetch_query(query)
-                for row in results:
-                    st.write(row)
+                columns, results = fetch_query(query)
+                if results:
+                    df = pd.DataFrame(results, columns=columns)
+                    st.dataframe(df)
+                else:
+                    st.info("No data found.")
 
         elif choice == "Update":
             st.subheader("Update Data")
-            table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "ABSENT"])
+            table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ABSENT"])
             if table == "ADMIN":
                 a_id = st.number_input("A_ID", min_value=1, step=1)
                 new_password = st.text_input("New Password", type="password")
