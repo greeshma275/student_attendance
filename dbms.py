@@ -6,7 +6,7 @@ db_config = {
     'host': 'localhost',
     'user': 'root',
     'password': 'greeshma@123',
-    'database': 'STUDENT_ATTENDANCE1'
+    'database': 'STUDENT_ATTENDANCE_RECORD'
 }
 
 # Function to establish database connection
@@ -60,18 +60,8 @@ def fetch_query(query, args=None):
 def authenticate(username, password):
     query = "SELECT * FROM ADMIN WHERE Username = %s AND Password = %s"
     result = fetch_query(query, (username, password))
+    st.write(f"Debug: authenticate result: {result}")  # Debug print
     return len(result) > 0
-
-st.title("Login Page")
-
-username = st.text_input("Username")
-password = st.text_input("Password", type="password")
-
-if st.button("Login"):
-    if authenticate(username, password):
-        st.success("Logged in successfully!")
-    else:
-        st.error("Invalid username or password.")
 
 # Function for login page
 def login_page():
@@ -82,25 +72,28 @@ def login_page():
         if authenticate(username, password):
             st.session_state.logged_in = True
             st.success("Logged in successfully.")
+            #st.write(f"Debug: session state: {st.session_state.logged_in}")  # Debug print
         else:
             st.error("Invalid username or password.")
 
 # Main Streamlit app
 def main():
-    if "logged_in" not in st.session_state:
-        st.session_state.logged_in = False
+    if "logged_in" in st.session_state:
+        st.session_state.logged_in =False
+
+    #st.write(f"Debug: before login_page session state: {st.session_state.logged_in}")  # Debug print
 
     if not st.session_state.logged_in:
         login_page()
     else:
         st.title("CRUD Operations with MySQL and Streamlit")
-
+        
         menu = ["Insert", "Read", "Update", "Delete"]
         choice = st.sidebar.selectbox("Menu", menu)
 
         if choice == "Insert":
             st.subheader("Insert Data")
-            table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "LEAVE_RECORDS"])
+            table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "ABSENT"])
             if table == "ADMIN":
                 a_id = st.number_input("A_ID", min_value=1, step=1)
                 username = st.text_input("Username")
@@ -140,18 +133,18 @@ def main():
                 if st.button("Insert"):
                     query = "INSERT INTO ATTENDANCE (Attendance_ID, Enroll_NO, Staff_ID) VALUES (%s, %s, %s)"
                     execute_query(query, (attendance_id, enroll_no, staff_id))
-            elif table == "LEAVE_RECORDS":
+            elif table == "ABSENT":
                 l_id = st.number_input("L_ID", min_value=1, step=1)
                 enroll_no = st.number_input("Enroll_NO", min_value=1, step=1)
                 reason = st.text_input("Reason")
                 days = st.number_input("Days", min_value=1, step=1)
                 if st.button("Insert"):
-                    query = "INSERT INTO LEAVE_RECORDS (L_ID, Enroll_NO, reason, days) VALUES (%s, %s, %s, %s)"
+                    query = "INSERT INTO ABSENT (L_ID, Enroll_NO, reason, days) VALUES (%s, %s, %s, %s)"
                     execute_query(query, (l_id, enroll_no, reason, days))
 
         elif choice == "Read":
             st.subheader("Read Data")
-            table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "LEAVE_RECORDS"])
+            table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "ABSENT"])
             if st.button("Fetch Data"):
                 query = f"SELECT * FROM {table}"
                 results = fetch_query(query)
@@ -160,7 +153,7 @@ def main():
 
         elif choice == "Update":
             st.subheader("Update Data")
-            table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "LEAVE_RECORDS"])
+            table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "ABSENT"])
             if table == "ADMIN":
                 a_id = st.number_input("A_ID", min_value=1, step=1)
                 new_password = st.text_input("New Password", type="password")
@@ -185,12 +178,46 @@ def main():
                 if st.button("Update"):
                     query = "UPDATE STUDENT SET Address = %s WHERE Enroll_NO = %s"
                     execute_query(query, (new_address, enroll_no))
-            elif table == "LEAVE_RECORDS":
+            elif table == "ABSENT":
                 l_id = st.number_input("L_ID", min_value=1, step=1)
                 new_days = st.number_input("New Days", min_value=1, step=1)
                 if st.button("Update"):
-                    query = "UPDATE LEAVE_RECORDS SET days = %s WHERE L_ID = %s"
+                    query = "UPDATE ABSENT SET days = %s WHERE L_ID = %s"
                     execute_query(query, (new_days, l_id))
 
         elif choice == "Delete":
             st.subheader("Delete Data")
+            table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "ABSENT"])
+            if table == "ADMIN":
+                a_id = st.number_input("A_ID", min_value=1, step=1)
+                if st.button("Delete"):
+                    query = "DELETE FROM ADMIN WHERE A_ID = %s"
+                    execute_query(query, (a_id,))
+            elif table == "BRANCH":
+                b_id = st.number_input("B_ID", min_value=1, step=1)
+                if st.button("Delete"):
+                    query = "DELETE FROM BRANCH WHERE B_ID = %s"
+                    execute_query(query, (b_id,))
+            elif table == "STAFF":
+                staff_id = st.number_input("Staff_ID", min_value=1, step=1)
+                if st.button("Delete"):
+                    query = "DELETE FROM STAFF WHERE Staff_ID = %s"
+                    execute_query(query, (staff_id,))
+            elif table == "STUDENT":
+                enroll_no = st.number_input("Enroll_NO", min_value=1, step=1)
+                if st.button("Delete"):
+                    query = "DELETE FROM STUDENT WHERE Enroll_NO = %s"
+                    execute_query(query, (enroll_no,))
+            elif table == "ATTENDANCE":
+                attendance_id = st.number_input("Attendance_ID", min_value=1, step=1)
+                if st.button("Delete"):
+                    query = "DELETE FROM ATTENDANCE WHERE Attendance_ID = %s"
+                    execute_query(query, (attendance_id,))
+            elif table == "ABSENT":
+                l_id = st.number_input("L_ID", min_value=1, step=1)
+                if st.button("Delete"):
+                    query = "DELETE FROM ABSENT WHERE L_ID = %s"
+                    execute_query(query, (l_id,))
+
+if __name__ == "__main__":
+    main()

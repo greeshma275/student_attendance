@@ -1,12 +1,13 @@
 import mysql.connector
 import streamlit as st
+from streamlit.components.v1 import html
 
 # Database connection configuration
 db_config = {
     'host': 'localhost',
     'user': 'root',
     'password': 'greeshma@123',
-    'database': 'COLLEGE12'  # Replace with your database name
+    'database': 'STUDENT_ATTENDANCE_RECORD'
 }
 
 # Function to establish database connection
@@ -18,7 +19,6 @@ def connect_to_database():
     except mysql.connector.Error as err:
         st.error(f"Error: {err}")
         return None
-    print(connection)
 
 # Function to execute SQL queries
 def execute_query(query, args=None):
@@ -38,52 +38,211 @@ def execute_query(query, args=None):
             cursor.close()
             connection.close()
 
+# Function to fetch data
+def fetch_query(query):
+    connection = connect_to_database()
+    if connection:
+        try:
+            cursor = connection.cursor()
+            cursor.execute(query)
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            st.error(f"Error: {err}")
+        finally:
+            cursor.close()
+            connection.close()
+    return []
+
 # Streamlit UI code for CRUD operations
 def main():
     st.title("CRUD Operations with MySQL and Streamlit")
 
-    # Insert operation
-    st.header("Insert Operation")
-    if st.button("Insert Sample Data"):
-        insert_query = "INSERT INTO ADMIN (A_ID, Username, Password) VALUES (1, 'admin1', 'password1')"
-        execute_query(insert_query)
+    # Adding background image
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background-image: url("https://your-background-image-url.com/image.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        .sidebar .sidebar-content {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .stButton>button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .stButton>button:hover {
+            background-color: #45a049;
+        }
+        .stTextInput>div>input {
+            border-radius: 5px;
+            border: 2px solid #4CAF50;
+        }
+        .stNumberInput>div>input {
+            border-radius: 5px;
+            border: 2px solid #4CAF50;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
-    # Update operation
-    st.header("Update Operation")
-    update_query = "UPDATE ADMIN SET Password = %s WHERE A_ID = %s"
-    new_password = st.text_input("New Password")
-    a_id_to_update = st.number_input("A_ID to Update", min_value=1, step=1)
-    if st.button("Update Password"):
-        execute_query(update_query, (new_password, a_id_to_update))
+    menu = ["Insert", "Read", "Update", "Delete"]
+    choice = st.sidebar.selectbox("Menu", menu)
 
-    # Delete operation
-    st.header("Delete Operation")
-    delete_query = "DELETE FROM ADMIN WHERE A_ID = %s"
-    a_id_to_delete = st.number_input("A_ID to Delete", min_value=1, step=1)
-    if st.button("Delete Record"):
-        execute_query(delete_query, (a_id_to_delete,))
+    if choice == "Insert":
+        st.subheader("Insert Data")
 
-    # Select operation (Read)
-    st.header("Select Operation")
-    select_query = "SELECT * FROM ADMIN"
-    if st.button("Show Admin Records"):
-        connection = connect_to_database()
-        if connection:
-            try:
-                cursor = connection.cursor()
-                cursor.execute(select_query)
-                records = cursor.fetchall()
-                if records:
-                    st.write("Admin Records:")
-                    for record in records:
-                        st.write(record)
-                else:
-                    st.warning("No records found.")
-            except mysql.connector.Error as err:
-                st.error(f"Error: {err}")
-            finally:
-                cursor.close()
-                connection.close()
+        table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "ABSENT"])
+
+        if table == "ADMIN":
+            a_id = st.number_input("A_ID", min_value=1, step=1)
+            username = st.text_input("Username")
+            password = st.text_input("Password", type="password")
+            if st.button("Insert"):
+                query = "INSERT INTO ADMIN (A_ID, Username, Password) VALUES (%s, %s, %s)"
+                execute_query(query, (a_id, username, password))
+
+        elif table == "BRANCH":
+            b_id = st.number_input("B_ID", min_value=1, step=1)
+            b_name = st.text_input("B_name")
+            seat = st.number_input("Seat", min_value=1, step=1)
+            a_id = st.number_input("A_ID", min_value=1, step=1)
+            if st.button("Insert"):
+                query = "INSERT INTO BRANCH (B_ID, B_name, seat, A_ID) VALUES (%s, %s, %s, %s)"
+                execute_query(query, (b_id, b_name, seat, a_id))
+
+        elif table == "STAFF":
+            staff_id = st.number_input("Staff_ID", min_value=1, step=1)
+            name = st.text_input("Name")
+            address = st.text_input("Address")
+            branch = st.text_input("Branch")
+            if st.button("Insert"):
+                query = "INSERT INTO STAFF (Staff_ID, Name, Address, Branch) VALUES (%s, %s, %s, %s)"
+                execute_query(query, (staff_id, name, address, branch))
+
+        elif table == "STUDENT":
+            enroll_no = st.number_input("Enroll_NO", min_value=1, step=1)
+            name = st.text_input("Name")
+            address = st.text_input("Address")
+            branch = st.text_input("Branch")
+            b_id = st.number_input("B_ID", min_value=1, step=1)
+            if st.button("Insert"):
+                query = "INSERT INTO STUDENT (Enroll_NO, Name, Address, Branch, B_ID) VALUES (%s, %s, %s, %s, %s)"
+                execute_query(query, (enroll_no, name, address, branch, b_id))
+
+        elif table == "ATTENDANCE":
+            attendance_id = st.number_input("Attendance_ID", min_value=1, step=1)
+            enroll_no = st.number_input("Enroll_NO", min_value=1, step=1)
+            staff_id = st.number_input("Staff_ID", min_value=1, step=1)
+            if st.button("Insert"):
+                query = "INSERT INTO ATTENDANCE (Attendance_ID, Enroll_NO, Staff_ID) VALUES (%s, %s, %s)"
+                execute_query(query, (attendance_id, enroll_no, staff_id))
+
+        elif table == "ABSENT":
+            l_id = st.number_input("L_ID", min_value=1, step=1)
+            enroll_no = st.number_input("Enroll_NO", min_value=1, step=1)
+            reason = st.text_input("Reason")
+            days = st.number_input("Days", min_value=1, step=1)
+            if st.button("Insert"):
+                query = "INSERT INTO ABSENT (L_ID, Enroll_NO, reason, days) VALUES (%s, %s, %s, %s)"
+                execute_query(query, (l_id, enroll_no, reason, days))
+
+    elif choice == "Read":
+        st.subheader("Read Data")
+
+        table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "ABSENT"])
+
+        if st.button("Fetch Data"):
+            query = f"SELECT * FROM {table}"
+            results = fetch_query(query)
+            for row in results:
+                st.write(row)
+
+    elif choice == "Update":
+        st.subheader("Update Data")
+
+        table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "ABSENT"])
+
+        if table == "ADMIN":
+            a_id = st.number_input("A_ID", min_value=1, step=1)
+            new_password = st.text_input("New Password", type="password")
+            if st.button("Update"):
+                query = "UPDATE ADMIN SET Password = %s WHERE A_ID = %s"
+                execute_query(query, (new_password, a_id))
+
+        elif table == "BRANCH":
+            b_id = st.number_input("B_ID", min_value=1, step=1)
+            new_seat = st.number_input("New Seat", min_value=1, step=1)
+            if st.button("Update"):
+                query = "UPDATE BRANCH SET seat = %s WHERE B_ID = %s"
+                execute_query(query, (new_seat, b_id))
+
+        elif table == "STAFF":
+            staff_id = st.number_input("Staff_ID", min_value=1, step=1)
+            new_address = st.text_input("New Address")
+            if st.button("Update"):
+                query = "UPDATE STAFF SET Address = %s WHERE Staff_ID = %s"
+                execute_query(query, (new_address, staff_id))
+
+        elif table == "STUDENT":
+            enroll_no = st.number_input("Enroll_NO", min_value=1, step=1)
+            new_address = st.text_input("New Address")
+            if st.button("Update"):
+                query = "UPDATE STUDENT SET Address = %s WHERE Enroll_NO = %s"
+                execute_query(query, (new_address, enroll_no))
+
+        elif table == "ABSENT":
+            l_id = st.number_input("L_ID", min_value=1, step=1)
+            new_days = st.number_input("New Days", min_value=1, step=1)
+            if st.button("Update"):
+                query = "UPDATE ABSENT SET days = %s WHERE L_ID = %s"
+                execute_query(query, (new_days, l_id))
+
+    elif choice == "Delete":
+        st.subheader("Delete Data")
+
+        table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "ABSENT"])
+
+        if table == "ADMIN":
+            a_id = st.number_input("A_ID", min_value=1, step=1)
+            if st.button("Delete"):
+                query = "DELETE FROM ADMIN WHERE A_ID = %s"
+                execute_query(query, (a_id,))
+
+        elif table == "BRANCH":
+            b_id = st.number_input("B_ID", min_value=1, step=1)
+            if st.button("Delete"):
+                query = "DELETE FROM BRANCH WHERE B_ID = %s"
+                execute_query(query, (b_id,))
+
+        elif table == "STAFF":
+            staff_id = st.number_input("Staff_ID", min_value=1, step=1)
+            if st.button("Delete"):
+                query = "DELETE FROM STAFF WHERE Staff_ID = %s"
+                execute_query(query, (staff_id,))
+
+        elif table == "STUDENT":
+            enroll_no = st.number_input("Enroll_NO", min_value=1, step=1)
+            if st.button("Delete"):
+                query = "DELETE FROM STUDENT WHERE Enroll_NO = %s"
+                execute_query(query, (enroll_no,))
+
+        elif table == "ATTENDANCE":
+            attendance_id = st.number_input("Attendance_ID", min_value=1, step=1)
+            if st.button("Delete"):
+                query = "DELETE FROM ATTENDANCE WHERE Attendance_ID = %s"
+                execute_query(query, (attendance_id,))
+
+        elif table == "ABSENT":
+            l_id = st.number_input("L_ID", min_value=1, step=1)
+            if st.button("Delete"):
+                query = "DELETE FROM ABSENT WHERE L_ID = %s"
+                execute_query(query, (l_id,))
 
 if __name__ == "__main__":
     main()

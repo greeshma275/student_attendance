@@ -6,7 +6,7 @@ db_config = {
     'host': 'localhost',
     'user': 'root',
     'password': 'greeshma@123',
-    'database': 'STUDENT_ATTENDANCE1'
+    'database': 'STUDENT_ATTENDANCE_RECORD'
 }
 
 # Function to establish database connection
@@ -55,7 +55,7 @@ def fetch_query(query):
 
 # Streamlit UI code for CRUD operations
 def main():
-    st.title("CRUD Operations with MySQL and Streamlit")
+    st.title("STUDENT ATTENDANCE RECORD")
 
     menu = ["Insert", "Read", "Update", "Delete"]
     choice = st.sidebar.selectbox("Menu", menu)
@@ -63,7 +63,7 @@ def main():
     if choice == "Insert":
         st.subheader("Insert Data")
 
-        table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "LEAVE_RECORDS"])
+        table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "ABSENT"])
 
         if table == "ADMIN":
             a_id = st.number_input("A_ID", min_value=1, step=1)
@@ -109,19 +109,19 @@ def main():
                 query = "INSERT INTO ATTENDANCE (Attendance_ID, Enroll_NO, Staff_ID) VALUES (%s, %s, %s)"
                 execute_query(query, (attendance_id, enroll_no, staff_id))
 
-        elif table == "LEAVE_RECORDS":
+        elif table == "ABSENT":
             l_id = st.number_input("L_ID", min_value=1, step=1)
             enroll_no = st.number_input("Enroll_NO", min_value=1, step=1)
             reason = st.text_input("Reason")
             days = st.number_input("Days", min_value=1, step=1)
             if st.button("Insert"):
-                query = "INSERT INTO LEAVE_RECORDS (L_ID, Enroll_NO, reason, days) VALUES (%s, %s, %s, %s)"
+                query = "INSERT INTO ABSENT (L_ID, Enroll_NO, reason, days) VALUES (%s, %s, %s, %s)"
                 execute_query(query, (l_id, enroll_no, reason, days))
 
     elif choice == "Read":
         st.subheader("Read Data")
 
-        table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "LEAVE_RECORDS"])
+        table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "ABSENT"])
 
         if st.button("Fetch Data"):
             query = f"SELECT * FROM {table}"
@@ -132,7 +132,7 @@ def main():
     elif choice == "Update":
         st.subheader("Update Data")
 
-        table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "LEAVE_RECORDS"])
+        table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "ABSENT"])
 
         if table == "ADMIN":
             a_id = st.number_input("A_ID", min_value=1, step=1)
@@ -162,17 +162,17 @@ def main():
                 query = "UPDATE STUDENT SET Address = %s WHERE Enroll_NO = %s"
                 execute_query(query, (new_address, enroll_no))
 
-        elif table == "LEAVE_RECORDS":
+        elif table == "ABSENT":
             l_id = st.number_input("L_ID", min_value=1, step=1)
             new_days = st.number_input("New Days", min_value=1, step=1)
             if st.button("Update"):
-                query = "UPDATE LEAVE_RECORDS SET days = %s WHERE L_ID = %s"
+                query = "UPDATE ABSENT SET days = %s WHERE L_ID = %s"
                 execute_query(query, (new_days, l_id))
 
     elif choice == "Delete":
         st.subheader("Delete Data")
 
-        table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "LEAVE_RECORDS"])
+        table = st.selectbox("Choose Table", ["ADMIN", "BRANCH", "STAFF", "STUDENT", "ATTENDANCE", "ABSENT"])
 
         if table == "ADMIN":
             a_id = st.number_input("A_ID", min_value=1, step=1)
@@ -204,10 +204,10 @@ def main():
                 query = "DELETE FROM ATTENDANCE WHERE Attendance_ID = %s"
                 execute_query(query, (attendance_id,))
 
-        elif table == "LEAVE_RECORDS":
+        elif table == "ABSENT":
             l_id = st.number_input("L_ID", min_value=1, step=1)
             if st.button("Delete"):
-                query = "DELETE FROM LEAVE_RECORDS WHERE L_ID = %s"
+                query = "DELETE FROM ABSENT WHERE L_ID = %s"
                 execute_query(query, (l_id,))
 
 if __name__ == "__main__":
