@@ -1,6 +1,6 @@
 import mysql.connector
 import streamlit as st
-from streamlit.components.v1 import html
+import pandas as pd  # Import pandas for handling DataFrames
 
 # Database connection configuration
 db_config = {
@@ -45,51 +45,19 @@ def fetch_query(query):
         try:
             cursor = connection.cursor()
             cursor.execute(query)
+            columns = [desc[0] for desc in cursor.description]  # Fetch column names
             result = cursor.fetchall()
-            return result
+            return columns, result
         except mysql.connector.Error as err:
             st.error(f"Error: {err}")
         finally:
             cursor.close()
             connection.close()
-    return []
+    return [], []
 
 # Streamlit UI code for CRUD operations
 def main():
-    st.title("CRUD Operations with MySQL and Streamlit")
-
-    # Adding background image
-    st.markdown(
-        """
-        <style>
-        .stApp {
-            background-image: url("https://your-background-image-url.com/image.jpg");
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-        }
-        .sidebar .sidebar-content {
-            background-color: rgba(0, 0, 0, 0.7);
-        }
-        .stButton>button {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .stButton>button:hover {
-            background-color: #45a049;
-        }
-        .stTextInput>div>input {
-            border-radius: 5px;
-            border: 2px solid #4CAF50;
-        }
-        .stNumberInput>div>input {
-            border-radius: 5px;
-            border: 2px solid #4CAF50;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+    st.title("STUDENT ATTENDANCE RECORD")
 
     menu = ["Insert", "Read", "Update", "Delete"]
     choice = st.sidebar.selectbox("Menu", menu)
@@ -159,9 +127,12 @@ def main():
 
         if st.button("Fetch Data"):
             query = f"SELECT * FROM {table}"
-            results = fetch_query(query)
-            for row in results:
-                st.write(row)
+            columns, results = fetch_query(query)
+            if results:
+                df = pd.DataFrame(results, columns=columns)
+                st.dataframe(df)
+            else:
+                st.info("No data found.")
 
     elif choice == "Update":
         st.subheader("Update Data")
@@ -246,3 +217,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
