@@ -5,6 +5,7 @@ The **Student Attendance Management System** is a web-based application built us
 
 ---
 
+![Screenshot 2024-07-30 204400](https://github.com/user-attachments/assets/d8c1349b-f1d3-4ec7-abb4-de9d54a901af)
 
 
 ## Features
@@ -32,9 +33,10 @@ The **Student Attendance Management System** is a web-based application built us
 
    - MySQL is used to store all application data, including student details, attendance records, and admin information.
 
-     ![Screenshot 2024-07-31 201740](https://github.com/user-attachments/assets/4d347b40-dfe7-4929-94ff-36fc76e312de)
+     ![Screenshot 2024-07-31 201740](https://github.com/user-attachments/assets/4d347b40-dfe7-4929-94ff-36fc76e312de)    ![Screenshot 2024-07-31 201939](https://github.com/user-attachments/assets/a54afd89-3344-4775-9591-d8146193850f)
 
 ### 4. **Streamlit Interface**
+
    - A responsive and intuitive interface for both administrators and students.
    - Custom login page tailored to the needs of the system.
 
