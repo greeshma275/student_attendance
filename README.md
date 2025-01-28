@@ -33,7 +33,7 @@ The **Student Attendance Management System** is a web-based application built us
 
    - MySQL is used to store all application data, including student details, attendance records, and admin information.
 
-     ![Screenshot 2024-07-31 201740](https://github.com/user-attachments/assets/4d347b40-dfe7-4929-94ff-36fc76e312de)    ![Screenshot 2024-07-31 201939](https://github.com/user-attachments/assets/a54afd89-3344-4775-9591-d8146193850f)
+     ![Screenshot 2024-07-31 201740](https://github.com/user-attachments/assets/4d347b40-dfe7-4929-94ff-36fc76e312de)   
 
 ### 4. **Streamlit Interface**
 
